@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'dart:ffi' as ffi;
 import 'dart:ffi';
-import 'dart:io' show Platform, Directory;
-import 'package:path/path.dart' as path;
+//import 'dart:io' show Platform, Directory;
+//import 'package:path/path.dart' as path;
+import 'package:object_browser/ads_def.dart';
 
 
 // Path to ob_test_dll.dll
 String objTestPath = 'C:/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
 // Open dynamic library that contains methods.
 final dylibObjTestDll = ffi.DynamicLibrary.open(objTestPath); 
+
 // Get functions from dll.
 final int Function() portOpen = dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
 final int Function() portClose = dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
+//final int Function(Pointer<AmsAddr> pServerAddr, Uint32 indexGroup, Uint32 indexOffset, Uint32 length, Pointer<Void> pData) readReq =
+//    dylibObjTestDll.lookup<NativeFunction<Int64 Function(ffi.Pointer<AmsAddr> pServerAddr, ffi.Uint32 indexGroup, ffi.Uint32 indexOffset, ffi.Uint32 length, ffi.Pointer<ffi.Void> pData)>>('read_req').asFunction();
+
+
 
 class LoadingDialog extends StatefulWidget {
   const LoadingDialog({Key? key}) : super(key: key);
