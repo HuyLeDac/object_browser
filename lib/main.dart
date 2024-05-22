@@ -212,6 +212,7 @@ class HomeScreen extends StatelessWidget {
       ),
 
       body: SingleChildScrollView( // Avoid Render Overflow
+        scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[ 
             Row(

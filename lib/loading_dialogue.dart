@@ -7,7 +7,7 @@ import 'package:object_browser/ads_def.dart';
 
 
 // Path to ob_test_dll.dll
-String objTestPath = 'C:/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
+String objTestPath = 'assets/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
 // Open dynamic library that contains methods.
 final dylibObjTestDll = ffi.DynamicLibrary.open(objTestPath); 
 
