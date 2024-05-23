@@ -8,7 +8,7 @@ import 'package:object_browser/loading_dialogue.dart';
 
 void main() {
   runApp(const MaterialApp(
-    home: HomeScreen(),
+    home: App(),
   ));
 }
 
@@ -199,8 +199,8 @@ final table =
   );
 
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
 
   
   @override

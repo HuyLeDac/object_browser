@@ -68,6 +68,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
     geoPlatformNumber = getGeoPlatformNumber(pServerAddr);
     portOpen ='Port open: ${portOpenFunc()}';
     portClose = 'Port close: ${portCloseFunc()}';
+    print(getGeoPlatformObjectAt(pServerAddr, 0));
 
     calloc.free(pServerAddr);
     calloc.free(pNetId);
