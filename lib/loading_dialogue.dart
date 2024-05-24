@@ -7,19 +7,24 @@ import 'package:object_browser/type_def.dart';
 //import 'package:path/path.dart' as path;
 
 
-// Path to ob_test_dll.dll, Open dynamic library. 
+/* Path to ob_test_dll.dll, Open dynamic library. */ 
 String objTestPath = 'C:/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
 final dylibObjTestDll = ffi.DynamicLibrary.open(objTestPath); 
 
-// Get functions from dll.
+/* Get functions from dll. */
+// port_open
 final int Function() portOpenFunc = 
     dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
+// port_close
 final int Function() portCloseFunc = 
     dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_close').asFunction();
+// read_req
 final int Function(Pointer<AmsAddr> pServerAddr, int indexGroup, int indexOffset, int length, Pointer<Void> pData) readReq =
     dylibObjTestDll.lookup<NativeFunction<Int64 Function(Pointer<AmsAddr> pServerAddr, UnsignedLong indexGroup, UnsignedLong indexOffset, UnsignedLong length, Pointer<Void> pData)>>('read_req').asFunction();
+// get_geo_platform_number
 final int Function(Pointer<AmsAddr> pServerAddr) getGeoPlatformNumber = 
     dylibObjTestDll.lookup<NativeFunction<Int32 Function(Pointer<AmsAddr> pServerAddr)>>('get_geo_platform_number').asFunction();
+// get_geo_platform_object_at
 final Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, int index) getGeoPlatformObjectAt = 
     dylibObjTestDll.lookup<NativeFunction<Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, UnsignedInt index)>>('get_geo_platform_object_at').asFunction();
 
@@ -43,14 +48,13 @@ class _LoadingDialogState extends State<LoadingDialog> {
   final pNetId = calloc.allocate<AmsNetId>(1);
 
   //Initialize PortOpen and PortClose and geoPlatformNumber
-  var portOpen = 'Failed to retrieve port open!';
-  var portClose = 'Failed to retrieve port close!';
+  var portOpen = -1;
+  var portClose = -1;
   var geoPlatformNumber = -1;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
   
     // Initialize pServerAddr and pNetId
     // Initialize the netId
@@ -66,39 +70,51 @@ class _LoadingDialogState extends State<LoadingDialog> {
     pServerAddr.ref.port = 851;
 
     geoPlatformNumber = getGeoPlatformNumber(pServerAddr);
-    portOpen ='Port open: ${portOpenFunc()}';
-    portClose = 'Port close: ${portCloseFunc()}';
-    print(getGeoPlatformObjectAt(pServerAddr, 0));
+    portOpen = portOpenFunc();
+    portClose = portCloseFunc();
+    print('Port open: $portOpen');
+    print('Port close: $portClose');
+    print('Geo platform number: $geoPlatformNumber');
+    print('pServerAddr: netId: ${pServerAddr.ref.netId}, port: ${pServerAddr.ref.port}');
+    
 
-    calloc.free(pServerAddr);
-    calloc.free(pNetId);
+    // load data
+    _loadData();
   }
 
   // Simulate loading data
-  void _loadData() {
+  void _loadData() async {
     setState(() {
       _isLoading = true;
       _progressValue = 0.0; // Reset progress value
     });
 
     final int totalSteps = getGeoPlatformNumber(pServerAddr);
-    const int delayMilliseconds = 50; // Adjust the delay time as needed
     
-    //simulate 
-    for (int i = 0; i <= totalSteps; i++) {
-      Future.delayed(Duration(milliseconds: i * delayMilliseconds), () {
+    
+    // Simulate loading bar progress
+    for (int i = 0; i < totalSteps; i++) {
+      await Future.delayed(const Duration(milliseconds: 50), () {
+        // Print cnc object
+        CNCObject object = getGeoPlatformObjectAt(pServerAddr, i).ref;
+        print('Current index: $i');
+        print('Group: ${object.group}, Offset: ${object.offset}, name: ${object.name}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
+
         setState(() {
           _progressValue = i / totalSteps;
         });
       });
     }
 
+
     // Simulate loading completion
-    Future.delayed(Duration(milliseconds: (totalSteps + 1) * delayMilliseconds), () {
+    await Future.delayed(const Duration(milliseconds: 200), () {
       setState(() {
         _isLoading = false; // Set isLoading to false when loading is completed
       });
+    });
 
+    await Future.delayed(const Duration(milliseconds: 4000), () {
       Navigator.of(context).pop(); // Close dialog when loading is completed
     });
 
@@ -113,23 +129,37 @@ class _LoadingDialogState extends State<LoadingDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            
+            // Progress bar
             LinearProgressIndicator(
               value: _progressValue,
               minHeight: 10,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 20), // gap between widgets
+
+            // Text for indicating, if the objects are still loading
             if (_isLoading)
               const Text('Loading CNC objects...')
             else
-              const Text('Loading complete'), // Show completion message when loading is complete
+              const Text('Loading complete'), 
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 20), // gap between widgets
+
+            // show port open/close and geoPlatformNumber
             if (!_isLoading)
-              Text('$portOpen \n $portClose \n GEO Platform Number: $geoPlatformNumber'), 
+              Text('Port open: $portOpen \nPort close: $portClose \nGEO Platform Number: $geoPlatformNumber'), 
           ],
         ),
       ),
     );
   }
+
+  @override
+  void dispose() {
+    calloc.free(pServerAddr);
+    calloc.free(pNetId);
+    super.dispose();
+  }
+
 }

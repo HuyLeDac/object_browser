@@ -1,5 +1,3 @@
-
-import 'package:flutter/material.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
@@ -10,16 +8,17 @@ final class AmsNetId extends Struct {
 
 final class AmsAddr extends Struct {
   external AmsNetId netId;
+  
   @Uint16()
   external int port;
 }
 
 // Define the Dart representation of the CNC_OBJECT struct
 final class CNCObject extends Struct {
-  @Uint64()
+  @Uint32()
   external int group;
 
-  @Uint64()
+  @Uint32()
   external int offset;
 
   external Pointer<Utf8> name;
@@ -27,7 +26,7 @@ final class CNCObject extends Struct {
   @Uint32()
   external int dataType;
 
-  @Uint64()
+  @Uint32()
   external int length;
 
   external Pointer<Utf8> unit;
