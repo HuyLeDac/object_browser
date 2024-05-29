@@ -98,7 +98,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
         // Print cnc object
         CNCObject object = getGeoPlatformObjectAt(pServerAddr, i).ref;
         print('Current index: $i');
-        print('Group: ${object.group}, Offset: ${object.offset}, name: ${object.name}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
+        print('Group: ${object.group}, Offset: ${object.offset}, name: ${object.name.toDartString()}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
 
         setState(() {
           _progressValue = i / totalSteps;

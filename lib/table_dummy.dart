@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TableDummy extends StatelessWidget {
-  const TableDummy({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: <Widget>[
+var table = 
+<Widget>[
           const Text('Table'),
           DataTable(
             columns: const [
@@ -33,7 +27,18 @@ class TableDummy extends StatelessWidget {
               ],
             )),
           ),
-        ],
+        ];
+
+        
+
+class TableDummy extends StatelessWidget {
+  const TableDummy({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: table
       ),
     );
   }
