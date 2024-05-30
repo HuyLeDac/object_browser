@@ -5,6 +5,9 @@ import 'package:ffi/ffi.dart';
 import 'package:object_browser/type_def.dart';
 //import 'dart:io' show Platform, Directory;
 //import 'package:path/path.dart' as path;
+import 'dart:convert' as dart_convert;
+import 'package:enough_convert/enough_convert.dart';
+
 
 
 /* Path to ob_test_dll.dll, Open dynamic library. */ 
@@ -97,8 +100,10 @@ class _LoadingDialogState extends State<LoadingDialog> {
       await Future.delayed(const Duration(milliseconds: 50), () {
         // Print cnc object
         CNCObject object = getGeoPlatformObjectAt(pServerAddr, i).ref;
+
+
         print('Current index: $i');
-        print('Group: ${object.group}, Offset: ${object.offset}, name: ${object.name.toDartString()}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
+        print('Group: ${object.group}, Offset: ${object.offset}, name: ${convertCp1252ToUtf8String(object)}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
 
         setState(() {
           _progressValue = i / totalSteps;
@@ -153,6 +158,24 @@ class _LoadingDialogState extends State<LoadingDialog> {
         ),
       ),
     );
+  }
+
+  //Convert cp1252 into Utf8
+  String convertCp1252ToUtf8String(CNCObject object){
+    //Convert cp1252 into Utf8
+    const codec = Windows1252Codec(allowInvalid: false);
+    List<int> name = [];
+    
+    for(int i=0; i < 256; i++){
+      if(object.name[i] == 0){
+        break;
+      }
+      name.add(object.name[i]);
+    }
+
+    print(name);
+    
+    return codec.decode(name);
   }
 
   @override

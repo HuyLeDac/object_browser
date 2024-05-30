@@ -1,5 +1,9 @@
 import 'dart:ffi';
+import 'package:enough_convert/enough_convert.dart';
 import 'package:ffi/ffi.dart';
+import 'dart:convert' as dart_convert;
+
+
 
 final class AmsNetId extends Struct {
   @Array(6)
@@ -21,14 +25,15 @@ final class CNCObject extends Struct {
   @Uint32()
   external int offset;
 
-  external Pointer<Utf8> name;
+  @Array<Uint8>(256)
+  external Array<Uint8> name;
 
   @Uint32()
   external int dataType;
 
   @Uint32()
   external int length;
-
+  
   external Pointer<Utf8> unit;
 
   @Uint32()

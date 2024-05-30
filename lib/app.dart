@@ -6,6 +6,8 @@ import 'package:object_browser/table_dummy.dart';
 //import 'dart:io' show Platform, Directory;
 //import 'package:path/path.dart' as path;
 
+//table where current data gets stored
+var objectDataTable = [];
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);

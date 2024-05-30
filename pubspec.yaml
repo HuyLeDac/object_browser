@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   animated_tree_view: ^2.2.0
   ffi: 2.1.2
+  enough_convert: ^1.6.0
 
 dev_dependencies:
   flutter_test:

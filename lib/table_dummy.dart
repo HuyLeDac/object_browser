@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 var table = 
-<Widget>[
-          const Text('Table'),
+
           DataTable(
             columns: const [
               DataColumn(label: Text('Nr:')),
@@ -26,8 +25,7 @@ var table =
                 DataCell(Text('cycle time')),
               ],
             )),
-          ),
-        ];
+          );
 
         
 
@@ -38,7 +36,11 @@ class TableDummy extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Column(
-        children: table
+        children: 
+          <Widget>[
+            const Text('Table'),
+            table,
+          ]
       ),
     );
   }
