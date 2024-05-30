@@ -2,107 +2,129 @@ import 'package:flutter/material.dart';
 import 'package:object_browser/loading_dialogue.dart';
 import 'package:object_browser/tree_node.dart';
 import 'package:object_browser/table_dummy.dart';
-//import 'dart:ffi' as ffi;
-//import 'dart:io' show Platform, Directory;
-//import 'package:path/path.dart' as path;
 
-//table where current data gets stored
-var objectDataTable = [];
+// Table where current data gets stored
+List<List<String>> objectDataTable = [];
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
 
-  
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  void _updateDataTable(List<List<String>> newData) {
+    setState(() {
+      objectDataTable = newData;
+    });
+  }
+
+  // Method to show the LoadingDialog and wait for it to complete
+  Future<void> _showLoadingDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LoadingDialog(onDataLoaded: _updateDataTable);
+      },
+    );
+  }
+
+  // Method to show another dialog after the LoadingDialog
+  Future<void> _showSecondDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Loading complete'),
+          content: const Text('This is the second dialog.'),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text('ObjectBrowser'),
       ),
-
-      body: SingleChildScrollView( // Avoid Render Overflow
+      body: SingleChildScrollView(
+        // Avoid Render Overflow
         scrollDirection: Axis.vertical,
         child: Column(
-          children: <Widget>[ 
+          children: <Widget>[
             Row(
-              // Load button, add other buttons later 
+              // Load button, add other buttons later
               children: <Widget>[
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
-        
                 ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const LoadingDialog(); // Show loading dialog when button is pressed
-                      },
-                    );
+                  onPressed: () async {
+                    await _showLoadingDialog(context);
+                    await _showSecondDialog(context);
                   },
                   child: const Text('Load CNC objects'),
                 ),
-        
-                const SizedBox(width: 20), 
-        
+                const SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const LoadingDialog(); // Dummy for modifying DLL paths
+                        return LoadingDialog(onDataLoaded: (data) {}); // Dummy for modifying DLL paths
                       },
                     );
                   },
                   child: const Text('Modify DLL path'),
                 ),
-        
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
-        
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const LoadingDialog(); // Dummy for other buttons 
+                        return  LoadingDialog(onDataLoaded: (data) {}); // Dummy for other buttons
                       },
                     );
                   },
                   child: const Text('...'),
                 ),
-              ]
-        
+              ],
             ),
-            
             // Add horizontal spacing
             const SizedBox(height: 20),
-        
             // Two columns, one for tree and one for the table which should illustrate all objects
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-        
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
-        
-                //Tree Dummy
+                // Tree Dummy
                 Expanded(
                   child: SingleChildScrollView(
                     child: TreeViewWidget(),
                   ),
                 ),
-
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
-
-                //Dummy table
-                TableDummy(), //Dummy table
-        
+                // Dummy table
+                Expanded(
+                  child: TableDummy(objectDataTable: objectDataTable),
+                ),
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
-        
               ],
             )
-          ]
+          ],
         ),
       ),
     );
   }
 }
+

@@ -1,7 +1,4 @@
 import 'dart:ffi';
-import 'package:enough_convert/enough_convert.dart';
-import 'package:ffi/ffi.dart';
-import 'dart:convert' as dart_convert;
 
 
 
@@ -34,7 +31,8 @@ final class CNCObject extends Struct {
   @Uint32()
   external int length;
   
-  external Pointer<Utf8> unit;
+  @Array<Uint8>(256)
+  external Array<Uint8> unit;
 
   @Uint32()
   external int cValue;

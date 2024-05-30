@@ -3,50 +3,37 @@ import 'dart:ffi' as ffi;
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:object_browser/type_def.dart';
-//import 'dart:io' show Platform, Directory;
-//import 'package:path/path.dart' as path;
-import 'dart:convert' as dart_convert;
+//import 'package:object_browser/app.dart';
 import 'package:enough_convert/enough_convert.dart';
 
+typedef DataCallback = void Function(List<List<String>>);
 
-
-/* Path to ob_test_dll.dll, Open dynamic library. */ 
 String objTestPath = 'C:/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
 final dylibObjTestDll = ffi.DynamicLibrary.open(objTestPath); 
 
-/* Get functions from dll. */
-// port_open
-final int Function() portOpenFunc = 
-    dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
-// port_close
-final int Function() portCloseFunc = 
-    dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_close').asFunction();
-// read_req
+final int Function() portOpenFunc = dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
+final int Function() portCloseFunc = dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_close').asFunction();
 final int Function(Pointer<AmsAddr> pServerAddr, int indexGroup, int indexOffset, int length, Pointer<Void> pData) readReq =
     dylibObjTestDll.lookup<NativeFunction<Int64 Function(Pointer<AmsAddr> pServerAddr, UnsignedLong indexGroup, UnsignedLong indexOffset, UnsignedLong length, Pointer<Void> pData)>>('read_req').asFunction();
-// get_geo_platform_number
 final int Function(Pointer<AmsAddr> pServerAddr) getGeoPlatformNumber = 
     dylibObjTestDll.lookup<NativeFunction<Int32 Function(Pointer<AmsAddr> pServerAddr)>>('get_geo_platform_number').asFunction();
-// get_geo_platform_object_at
 final Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, int index) getGeoPlatformObjectAt = 
     dylibObjTestDll.lookup<NativeFunction<Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, UnsignedInt index)>>('get_geo_platform_object_at').asFunction();
 
-
-
 class LoadingDialog extends StatefulWidget {
-  const LoadingDialog({Key? key}) : super(key: key);
+  final DataCallback onDataLoaded;
+
+  const LoadingDialog({Key? key, required this.onDataLoaded}) : super(key: key);
 
   @override
   _LoadingDialogState createState() => _LoadingDialogState();
 }
 
 class _LoadingDialogState extends State<LoadingDialog> {
-  
-  //Values for Progress bar
   double _progressValue = 0.0;
   bool _isLoading = false;
 
-  // Allocate memory for AmsAddr and AmsNetId
+   // Allocate memory for AmsAddr and AmsNetId
   final pServerAddr = calloc.allocate<AmsAddr>(1);
   final pNetId = calloc.allocate<AmsNetId>(1);
 
@@ -55,11 +42,12 @@ class _LoadingDialogState extends State<LoadingDialog> {
   var portClose = -1;
   var geoPlatformNumber = -1;
 
+
   @override
   void initState() {
     super.initState();
-  
-    // Initialize pServerAddr and pNetId
+
+    // Initialize dummy pServerAddr and pNetId
     // Initialize the netId
     pNetId.ref.b[0] = 1;
     pNetId.ref.b[1] = 2;
@@ -69,19 +57,16 @@ class _LoadingDialogState extends State<LoadingDialog> {
     pNetId.ref.b[5] = 6;
     // Assign the netId to pServerAddr
     pServerAddr.ref.netId = pNetId.ref;
-    // Initialize the port
+    // Initialize dummy port
     pServerAddr.ref.port = 851;
 
     geoPlatformNumber = getGeoPlatformNumber(pServerAddr);
     portOpen = portOpenFunc();
     portClose = portCloseFunc();
     print('Port open: $portOpen');
-    print('Port close: $portClose');
-    print('Geo platform number: $geoPlatformNumber');
-    print('pServerAddr: netId: ${pServerAddr.ref.netId}, port: ${pServerAddr.ref.port}');
-    
+    //print('Port close: $portClose');
+    print('pServerAddr: netId: ${pServerAddr.ref.netId.b.toString()}, port: ${pServerAddr.ref.port}');
 
-    // load data
     _loadData();
   }
 
@@ -89,21 +74,49 @@ class _LoadingDialogState extends State<LoadingDialog> {
   void _loadData() async {
     setState(() {
       _isLoading = true;
-      _progressValue = 0.0; // Reset progress value
+      _progressValue = 0.0;
     });
 
-    final int totalSteps = getGeoPlatformNumber(pServerAddr);
+    // TODO: 0 gets printed sometimes, fix issue later 
+    int totalSteps = 0;
+    while(totalSteps == 0){
+      totalSteps = getGeoPlatformNumber(pServerAddr);
+    }
     
-    
+    print('Geo platform number: $totalSteps');
+
+
+
+    List<List<String>> newData = List.generate(totalSteps, (_) => []);;
+
     // Simulate loading bar progress
     for (int i = 0; i < totalSteps; i++) {
       await Future.delayed(const Duration(milliseconds: 50), () {
-        // Print cnc object
+
+        // Get current CNC Object from dll
         CNCObject object = getGeoPlatformObjectAt(pServerAddr, i).ref;
 
+        String group = object.group.toString();
+        String offset = object.offset.toString();
+        String name = convertNameFromCp1252ToUtf8String(object);
+        String dataType = object.dataType.toString();
+        String length = object.length.toString();
+        String unit = convertUnitFromCp1252ToUtf8String(object);
+        String cValue = object.cValue.toString();
+        String value = object.value.toString();
 
-        print('Current index: $i');
-        print('Group: ${object.group}, Offset: ${object.offset}, name: ${convertCp1252ToUtf8String(object)}, Data Type: ${object.dataType}, Length: ${object.length}, unit: ${object.unit}, Cvalue: ${object.cValue}, Value: ${object.value}');
+        newData[i].add(group);
+        newData[i].add(offset);
+        newData[i].add(name);
+        newData[i].add(dataType);
+        newData[i].add(length);
+        newData[i].add(unit);
+        newData[i].add(cValue);
+        newData[i].add(value);
+
+        // Print cnc object
+        print('\nCurrent index: $i');
+        print('Group: ${newData[i][0]}, Offset: ${newData[i][1]}, name: ${newData[i][2]}, Data Type: ${newData[i][3]}, Length: ${newData[i][4]}, unit: ${newData[i][5]}, Cvalue: ${newData[i][6]}, Value: ${newData[i][7]}\n');
 
         setState(() {
           _progressValue = i / totalSteps;
@@ -111,19 +124,15 @@ class _LoadingDialogState extends State<LoadingDialog> {
       });
     }
 
+    widget.onDataLoaded(newData);
 
-    // Simulate loading completion
-    await Future.delayed(const Duration(milliseconds: 200), () {
-      setState(() {
-        _isLoading = false; // Set isLoading to false when loading is completed
-      });
+    setState(() {
+      _isLoading = false;
     });
 
-    await Future.delayed(const Duration(milliseconds: 4000), () {
+    await Future.delayed(const Duration(milliseconds: 3000), () {
       Navigator.of(context).pop(); // Close dialog when loading is completed
     });
-
-
   }
 
   @override
@@ -134,23 +143,13 @@ class _LoadingDialogState extends State<LoadingDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            
-            // Progress bar
             LinearProgressIndicator(
               value: _progressValue,
               minHeight: 10,
             ),
-
+            const SizedBox(height: 20),
+            _isLoading ? const Text('Loading CNC objects...') : const Text('Loading complete'), 
             const SizedBox(height: 20), // gap between widgets
-
-            // Text for indicating, if the objects are still loading
-            if (_isLoading)
-              const Text('Loading CNC objects...')
-            else
-              const Text('Loading complete'), 
-
-            const SizedBox(height: 20), // gap between widgets
-
             // show port open/close and geoPlatformNumber
             if (!_isLoading)
               Text('Port open: $portOpen \nPort close: $portClose \nGEO Platform Number: $geoPlatformNumber'), 
@@ -161,8 +160,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
   }
 
   //Convert cp1252 into Utf8
-  String convertCp1252ToUtf8String(CNCObject object){
-    //Convert cp1252 into Utf8
+  String convertNameFromCp1252ToUtf8String(CNCObject object){
     const codec = Windows1252Codec(allowInvalid: false);
     List<int> name = [];
     
@@ -172,10 +170,22 @@ class _LoadingDialogState extends State<LoadingDialog> {
       }
       name.add(object.name[i]);
     }
-
-    print(name);
     
     return codec.decode(name);
+  }
+
+  String convertUnitFromCp1252ToUtf8String(CNCObject object){
+    const codec = Windows1252Codec(allowInvalid: false);
+    List<int> unitUtf8 = [];
+    
+    for(int i=0; i < 256; i++){
+      if(object.unit[i] == 0){
+        break;
+      }
+      unitUtf8.add(object.unit[i]);
+    }
+    
+    return codec.decode(unitUtf8);
   }
 
   @override
@@ -186,3 +196,4 @@ class _LoadingDialogState extends State<LoadingDialog> {
   }
 
 }
+
