@@ -40,7 +40,7 @@ final class CNCObject extends Struct {
   external Pointer value; // Assuming CNC_OBJECT_VALUE is a void pointer
 }
 
-/** 
+ 
 // Define enum for CNC_OBJECT_TYPE
 enum CNCObjectType {
   NN,
@@ -118,4 +118,3 @@ const Map<CNCObjectType, String> cncObjectTypeToString = {
   CNCObjectType.ArraySGN64: "ArraySGN64",
   CNCObjectType.ArrayREAL32: "ArrayREAL32",
 };
-*/

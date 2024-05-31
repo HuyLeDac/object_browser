@@ -10,19 +10,19 @@ class TableDummy extends StatelessWidget {
     return Card(
       child: Column(
         children: <Widget>[
-          const Text('Table'),
+          const Text('CNC Objects table'),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
               columns: const [
-                DataColumn(label: Text('Nr:')),
                 DataColumn(label: Text('Gruppe')),
                 DataColumn(label: Text('Offset:')),
-                DataColumn(label: Text('Bezeichner:')),
+                DataColumn(label: Text('Name/Bezeichner:')),
                 DataColumn(label: Text('Datentyp:')),
                 DataColumn(label: Text('Länge:')),
                 DataColumn(label: Text('Einheit:')),
-                DataColumn(label: Text('Wert:')),
+                DataColumn(label: Text('cValue:')),
+                DataColumn(label: Text('pValue:')),
               ],
               rows: List<DataRow>.generate(
                 objectDataTable.length,

@@ -96,8 +96,8 @@ class _LoadingDialogState extends State<LoadingDialog> {
         // Get current CNC Object from dll
         CNCObject object = getGeoPlatformObjectAt(pServerAddr, i).ref;
 
-        String group = object.group.toString();
-        String offset = object.offset.toString();
+        String group = toHexString(object.group);
+        String offset = toHexString(object.offset);
         String name = convertNameFromCp1252ToUtf8String(object);
         String dataType = object.dataType.toString();
         String length = object.length.toString();
@@ -186,6 +186,11 @@ class _LoadingDialogState extends State<LoadingDialog> {
     }
     
     return codec.decode(unitUtf8);
+  }
+
+  // Helper function to convert numbers to hexadecimal strings
+  String toHexString(int number) {
+    return '0x${number.toRadixString(16).toUpperCase()}';
   }
 
   @override

@@ -56,16 +56,19 @@ class _AppState extends State<App> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ObjectBrowser'),
+        backgroundColor:const Color.fromRGBO(0, 157, 224, 1),
       ),
       body: SingleChildScrollView(
         // Avoid Render Overflow
         scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
+            const SizedBox(height: 20),
             Row(
               // Load button, add other buttons later
               children: <Widget>[
-                const SizedBox(width: 20), // Adds horizontal space of 20 pixels
+                const SizedBox(width: 20), // Adds vertical space of 20 pixels
+
                 ElevatedButton(
                   onPressed: () async {
                     await _showLoadingDialog(context);
@@ -73,7 +76,9 @@ class _AppState extends State<App> {
                   },
                   child: const Text('Load CNC objects'),
                 ),
-                const SizedBox(width: 20),
+
+                const SizedBox(width: 20), // Adds vertical space of 20 pixels
+
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -85,7 +90,9 @@ class _AppState extends State<App> {
                   },
                   child: const Text('Modify DLL path'),
                 ),
-                const SizedBox(width: 20), // Adds horizontal space of 20 pixels
+
+                const SizedBox(width: 20), // Adds veritcal space of 20 pixels
+
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -99,8 +106,10 @@ class _AppState extends State<App> {
                 ),
               ],
             ),
+
             // Add horizontal spacing
             const SizedBox(height: 20),
+
             // Two columns, one for tree and one for the table which should illustrate all objects
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -108,14 +117,16 @@ class _AppState extends State<App> {
               children: <Widget>[
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
                 // Tree Dummy
-                Expanded(
+                const Flexible(
+                  flex: 1,
                   child: SingleChildScrollView(
                     child: TreeViewWidget(),
                   ),
                 ),
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
                 // Dummy table
-                Expanded(
+                Flexible(
+                  flex: 4,
                   child: TableDummy(objectDataTable: objectDataTable),
                 ),
                 const SizedBox(width: 20), // Adds horizontal space of 20 pixels
