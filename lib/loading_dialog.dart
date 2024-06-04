@@ -3,12 +3,13 @@ import 'dart:ffi' as ffi;
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:object_browser/type_def.dart';
-//import 'package:object_browser/app.dart';
+import 'package:object_browser/app.dart';
 import 'package:enough_convert/enough_convert.dart';
 
-typedef DataCallback = void Function(List<List<String>>);
+typedef DataCallbackTable = void Function(List<List<String>>);
+typedef DataCallbackPortOpen = void Function(int);
+typedef DataCallbackGeoPlatform = void Function(int);
 
-String objTestPath = 'C:/cnc_objects_test_dll/x64/Debug/ob_test_dll.dll'; 
 final dylibObjTestDll = ffi.DynamicLibrary.open(objTestPath); 
 
 final int Function() portOpenFunc = dylibObjTestDll.lookup<NativeFunction<Int64 Function()>>('port_open').asFunction();
@@ -20,10 +21,20 @@ final int Function(Pointer<AmsAddr> pServerAddr) getGeoPlatformNumber =
 final Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, int index) getGeoPlatformObjectAt = 
     dylibObjTestDll.lookup<NativeFunction<Pointer<CNCObject> Function(Pointer<AmsAddr> pServerAddr, UnsignedInt index)>>('get_geo_platform_object_at').asFunction();
 
-class LoadingDialog extends StatefulWidget {
-  final DataCallback onDataLoaded;
 
-  const LoadingDialog({Key? key, required this.onDataLoaded}) : super(key: key);
+//Initialize PortOpen and PortClose and geoPlatformNumber
+  var portOpen = -1;
+  var portClose = -1;
+  var geoPlatformNumber = -1;
+
+class LoadingDialog extends StatefulWidget {
+  final DataCallbackTable onDataLoaded;
+  final DataCallbackPortOpen onPortOpenLoaded;
+  final DataCallbackGeoPlatform onGeoPlatformLoaded;
+
+  const LoadingDialog({Key? key, required this.onDataLoaded, 
+                                  required this.onPortOpenLoaded,
+                                  required this.onGeoPlatformLoaded}) : super(key: key);
 
   @override
   _LoadingDialogState createState() => _LoadingDialogState();
@@ -36,11 +47,6 @@ class _LoadingDialogState extends State<LoadingDialog> {
    // Allocate memory for AmsAddr and AmsNetId
   final pServerAddr = calloc.allocate<AmsAddr>(1);
   final pNetId = calloc.allocate<AmsNetId>(1);
-
-  //Initialize PortOpen and PortClose and geoPlatformNumber
-  var portOpen = -1;
-  var portClose = -1;
-  var geoPlatformNumber = -1;
 
 
   @override
@@ -60,7 +66,6 @@ class _LoadingDialogState extends State<LoadingDialog> {
     // Initialize dummy port
     pServerAddr.ref.port = 851;
 
-    geoPlatformNumber = getGeoPlatformNumber(pServerAddr);
     portOpen = portOpenFunc();
     portClose = portCloseFunc();
     print('Port open: $portOpen');
@@ -87,7 +92,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
 
 
 
-    List<List<String>> newData = List.generate(totalSteps, (_) => []);;
+    List<List<String>> newData = List.generate(totalSteps, (_) => []);
 
     // Simulate loading bar progress
     for (int i = 0; i < totalSteps; i++) {
@@ -113,7 +118,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
         newData[i].add(unit);
         newData[i].add(cValue);
         newData[i].add(value);
-
+        
         // Print cnc object
         print('\nCurrent index: $i');
         print('Group: ${newData[i][0]}, Offset: ${newData[i][1]}, name: ${newData[i][2]}, Data Type: ${newData[i][3]}, Length: ${newData[i][4]}, unit: ${newData[i][5]}, Cvalue: ${newData[i][6]}, Value: ${newData[i][7]}\n');
@@ -125,6 +130,8 @@ class _LoadingDialogState extends State<LoadingDialog> {
     }
 
     widget.onDataLoaded(newData);
+    widget.onPortOpenLoaded(portOpen);
+    widget.onGeoPlatformLoaded(totalSteps);
 
     setState(() {
       _isLoading = false;
@@ -191,6 +198,11 @@ class _LoadingDialogState extends State<LoadingDialog> {
   // Helper function to convert numbers to hexadecimal strings
   String toHexString(int number) {
     return '0x${number.toRadixString(16).toUpperCase()}';
+  }
+
+  // Function to get the string representation of CNCObjectType
+  String getCNCObjectTypeString(int dataType) {
+    return cncObjectTypeToString[CNCObjectType.values[dataType]] ?? 'Unknown';
   }
 
   @override

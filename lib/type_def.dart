@@ -118,3 +118,4 @@ const Map<CNCObjectType, String> cncObjectTypeToString = {
   CNCObjectType.ArraySGN64: "ArraySGN64",
   CNCObjectType.ArrayREAL32: "ArrayREAL32",
 };
+

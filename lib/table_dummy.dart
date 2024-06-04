@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class TableDummy extends StatelessWidget {
   final List<List<String>> objectDataTable;
+  final int portOpen;
+  final int geoPlatformNumber;
 
-  const TableDummy({Key? key, required this.objectDataTable}) : super(key: key);
+  const TableDummy({Key? key, required this.objectDataTable, required this.portOpen, required this.geoPlatformNumber}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +13,8 @@ class TableDummy extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const Text('CNC Objects table'),
+          Text('Port Open: $portOpen'),
+          Text('Geo Platform Number: $geoPlatformNumber'),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
@@ -36,6 +40,7 @@ class TableDummy extends StatelessWidget {
                     DataCell(Text(objectDataTable[index][5])),
                     DataCell(Text(objectDataTable[index][6])),
                     DataCell(Text(objectDataTable[index][7])),
+
                   ],
                 ),
               ),
