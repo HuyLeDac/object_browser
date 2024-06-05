@@ -52,32 +52,12 @@ class _AppState extends State<App> {
     await showDialog(
       context: _scaffoldKey.currentContext!,
       builder: (BuildContext context) {
-        return LoadingDialog(onDataLoaded: _updateDataTable, onPortOpenLoaded: _updatePortOpen, onGeoPlatformLoaded: _updateGeoPlatformNumber,);
+        return LoadingDialog(onTableLoaded: _updateDataTable, onPortOpenLoaded: _updatePortOpen, onGeoPlatformLoaded: _updateGeoPlatformNumber,);
       },
     );
   }
 
-  // Method to show another dialog after the LoadingDialog
-  Future<void> _showLoadingCompletionDialog() async {
-    await showDialog(
-      context: _scaffoldKey.currentContext!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Loading complete'),
-          content: const Text('Content got updated.'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+  
   // Method to show another dialog after the LoadingDialog
   Future<void> _showChangePathDialog() async {
     await showDialog(
@@ -105,7 +85,6 @@ class _AppState extends State<App> {
                       });
                       Navigator.of(context).pop();
                       await _showLoadingDialog();
-                      await _showLoadingCompletionDialog();
                     },
                     child: const Text('Save and reload'),
                   ),
@@ -149,7 +128,6 @@ class _AppState extends State<App> {
                       ElevatedButton(
                         onPressed: () async {
                           await _showLoadingDialog();
-                          await _showLoadingCompletionDialog();
                         },
                         child: const Text('Load CNC objects'),
                       ),
@@ -166,7 +144,7 @@ class _AppState extends State<App> {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return LoadingDialog(onDataLoaded: (data) {}, onPortOpenLoaded: (data) {}, onGeoPlatformLoaded: (data) {},); // Dummy for other buttons
+                              return LoadingDialog(onTableLoaded: (data) {}, onPortOpenLoaded: (data) {}, onGeoPlatformLoaded: (data) {},); // Dummy for other buttons
                             },
                           );
                         },

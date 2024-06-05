@@ -38,6 +38,7 @@ final class CNCObject extends Struct {
   external int cValue;
 
   external Pointer value; // Assuming CNC_OBJECT_VALUE is a void pointer
+  
 }
 
  
