@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+/// File where new structs and types are defineds
 
 
 final class AmsNetId extends Struct {
@@ -25,6 +26,7 @@ final class CNCObject extends Struct {
   @Array<Uint8>(256)
   external Array<Uint8> name;
 
+  // TODO: Extract data type? 
   @Uint32()
   external int dataType;
 

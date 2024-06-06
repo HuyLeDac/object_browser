@@ -56,7 +56,6 @@ class _LoadingDialogState extends State<LoadingDialog> {
   late int portClose;
   late int geoPlatformNumber;
   final Completer<void> _loadingCompleter = Completer<void>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Allocate memory for AmsAddr and AmsNetId
   final pServerAddr = calloc.allocate<AmsAddr>(1);
@@ -92,17 +91,17 @@ class _LoadingDialogState extends State<LoadingDialog> {
     });
 
     // Get geoPlatformNumber (number of existing objects)
-    int totalSteps = 0;
-    while (totalSteps == 0) {
-      totalSteps = getGeoPlatformNumber(pServerAddr); // TODO: 0 gets printed sometimes, fix issue later
+    geoPlatformNumber = 0;
+    while (geoPlatformNumber == 0) {
+      geoPlatformNumber = getGeoPlatformNumber(pServerAddr); // TODO: 0 gets printed sometimes, fix issue later
     }
-    debugPrint('Geo platform number: $totalSteps');
+    debugPrint('Geo platform number: $geoPlatformNumber');
 
     // Genereate empty list for the new data
-    List<List<String>> newData = List.generate(totalSteps, (_) => []);
+    List<List<String>> newData = List.generate(geoPlatformNumber, (_) => []);
 
     // Simulate loading bar progress by iterating though every object 
-    for (int i = 0; i < totalSteps; i++) {
+    for (int i = 0; i < geoPlatformNumber; i++) {
 
       /// In case of asynchronous loading completion (e.g. tapping outside the loading bar)
       /// cancel loading progress
@@ -144,7 +143,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
         // Only change state if widget is still mounted (to avoid memory leak)
         if (mounted) {
           setState(() {
-            _progressValue = i / totalSteps;
+            _progressValue = i / geoPlatformNumber;
           });
         }
       });
@@ -156,7 +155,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
       // Pass data to current parent widget
       widget.onTableLoaded(newData);
       widget.onPortOpenLoaded(portOpen);
-      widget.onGeoPlatformLoaded(totalSteps);
+      widget.onGeoPlatformLoaded(geoPlatformNumber);
 
       // Mark that loading progress is finished
       if (mounted) {
@@ -244,10 +243,10 @@ class _LoadingDialogState extends State<LoadingDialog> {
     return '0x${number.toRadixString(16).toUpperCase()}';
   }
 
-  // Method to show another dialog after the LoadingDialog
+  // Method to show another dialog after the loading completion
   Future<void> _showLoadingCompletionDialog() async {
     await showDialog(
-      context: _scaffoldKey.currentContext!,
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Loading complete'),

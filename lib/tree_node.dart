@@ -1,50 +1,58 @@
 import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 
+// Node for each object
+class CNCObjectNode {
+  final int id;
+  final int offset;
+  final String groupName;
+  final String type;
+  final int length;
+  final String unit;
+  final int arraySize;
+  final String? value;  // Assuming value is a string representation, modify as needed.
 
-//Define Node class
-class UserName {
-  final String firstName;
-  final String lastName;
-
-  UserName(this.firstName, this.lastName);
+  CNCObjectNode(this.id, this.offset, this.groupName, this.type, this.length, this.unit, this.arraySize, this.value);
 }
 
-//Dummy Tree
-final tree = TreeNode<UserName>.root(data: UserName("User", "Names"))
+// Dummy Tree, only for illustration 
+final tree = TreeNode<CNCObjectNode>.root(data: CNCObjectNode(0, 0, "Root", "ROOT_TYPE", 0, "-", 0, null))
   ..addAll([
-    TreeNode<UserName>(key: "0A", data: UserName("Sr. John", "Doe"))
-      ..add(TreeNode(key: "0A1A", data: UserName("Jr. John", "Doe"))),
-    TreeNode<UserName>(key: "0C", data: UserName("General", "Lee"))
+    TreeNode<CNCObjectNode>(key: "0A", data: CNCObjectNode(1180416, 0, "POS-CTRL: elements", "UNS32", 4, "-", 1, "&value_list[0]"))
+      ..add(TreeNode(key: "0A1A", data: CNCObjectNode(1180416, 1, "cycle time", "REAL64", 8, "s", 1, "&value_list[1]"))),
+    TreeNode<CNCObjectNode>(key: "0C", data: CNCObjectNode(1180416, 2, "number of axes", "UNS16", 2, "-", 1, "&value_list[2]"))
       ..addAll([
-        TreeNode<UserName>(key: "0C1A", data: UserName("Major", "Lee")),
-        TreeNode<UserName>(key: "0C1B", data: UserName("Happy", "Lee")),
-        TreeNode<UserName>(key: "0C1C", data: UserName("Busy", "Lee"))
+        TreeNode<CNCObjectNode>(key: "0C1A", data: CNCObjectNode(1180416, 3, "logical axis ID by index", "NN", 2, "-", 0, null)),
+        TreeNode<CNCObjectNode>(key: "0C1B", data: CNCObjectNode(1180416, 4, "log errors", "_BOOL", 1, "-", 1, "&value_list[3]")),
+        TreeNode<CNCObjectNode>(key: "0C1C", data: CNCObjectNode(1180416, 5, "retain.data_valid", "_BOOL", 1, "-", 1, "&value_list[4]"))
           ..addAll([
-            TreeNode<UserName>(key: "0C1C2A", data: UserName("Jr. Busy", "Lee"))
+            TreeNode<CNCObjectNode>(key: "0C1C2A", data: CNCObjectNode(1180416, 6, "axis state: compatibility mode", "_BOOL", 1, "-", 1, "&value_list[5]"))
           ]),
       ]),
-    TreeNode<UserName>(key: "0D", data: UserName("Mr. Anderson", "Neo")),
-    TreeNode<UserName>(key: "0E", data: UserName("Mr. Smith", "Agent")),
+    TreeNode<CNCObjectNode>(key: "0D", data: CNCObjectNode(1180416, 7, "tick counter", "UNS32", 4, "-", 1, "&value_list[6]")),
+    TreeNode<CNCObjectNode>(key: "0E", data: CNCObjectNode(1180416, 8, "cyclic_call", "_BOOL", 1, "-", 1, "&value_list[7]")),
   ]);
 
+
+// Build tree 
 class TreeViewWidget extends StatelessWidget {
     
     const TreeViewWidget({Key? key}) : super(key: key);
     
     @override
     Widget build(BuildContext context) {
-      return TreeView.simpleTyped<UserName, TreeNode<UserName>>(
+      return TreeView.simpleTyped<CNCObjectNode, TreeNode<CNCObjectNode>>(
         tree: tree,
         expansionBehavior: ExpansionBehavior.snapToTop,
         shrinkWrap: true,
         builder: (context, node) => Card(
           child: ListTile(
             title: Text("Item ${node.level}-${node.key}"),
-            subtitle: Text('${node.data?.firstName} ${node.data?.lastName}'),
+            subtitle: Text('Group: ${node.data?.groupName}\nID: ${node.data?.id}'),
           ),
         ),
       );
     }
 }
+
 
