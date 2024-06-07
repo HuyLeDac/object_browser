@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 
 // Node for each object
 class CNCObjectNode {
-  final int id;
+  final int group;
   final int offset;
-  final String groupName;
-  final String type;
+  final String name;
+  final String dataType;
   final int length;
   final String unit;
-  final int arraySize;
+  final int cValue;
   final String? value;  // Assuming value is a string representation, modify as needed.
 
-  CNCObjectNode(this.id, this.offset, this.groupName, this.type, this.length, this.unit, this.arraySize, this.value);
+  CNCObjectNode(this.group, this.offset, this.name, this.dataType, this.length, this.unit, this.cValue, this.value);
 }
 
 // Dummy Tree, only for illustration 
@@ -36,23 +36,22 @@ final tree = TreeNode<CNCObjectNode>.root(data: CNCObjectNode(0, 0, "Root", "ROO
 
 // Build tree 
 class TreeViewWidget extends StatelessWidget {
+  final double fontSize;
+
+  const TreeViewWidget({Key? key, required this.fontSize}) : super(key: key);
     
-    const TreeViewWidget({Key? key}) : super(key: key);
-    
-    @override
-    Widget build(BuildContext context) {
-      return TreeView.simpleTyped<CNCObjectNode, TreeNode<CNCObjectNode>>(
-        tree: tree,
-        expansionBehavior: ExpansionBehavior.snapToTop,
-        shrinkWrap: true,
-        builder: (context, node) => Card(
-          child: ListTile(
-            title: Text("Item ${node.level}-${node.key}"),
-            subtitle: Text('Group: ${node.data?.groupName}\nID: ${node.data?.id}'),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return TreeView.simpleTyped<CNCObjectNode, TreeNode<CNCObjectNode>>(
+      tree: tree,
+      expansionBehavior: ExpansionBehavior.snapToTop,
+      shrinkWrap: true,
+      builder: (context, node) => Card(
+        child: ListTile(
+          title: Text("Item ${node.level}-${node.key}", style: TextStyle(fontSize: fontSize)),
+          subtitle: Text('Group: ${node.data?.group}\nName: ${node.data?.name}', style: TextStyle(fontSize: fontSize)),
         ),
-      );
-    }
+      ),
+    );
+  }
 }
-
-
