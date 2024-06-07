@@ -197,7 +197,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
             children: <Widget>[
               LinearProgressIndicator(value: _progressValue, minHeight: 10,),
               const SizedBox(height: 20), // gap between widgets
-              _isLoading ? const Text('Loading CNC objects...') : const Text('Loading complete'),
+              _isLoading ? Text('Retrieving CNC objects from $objTestPath ...') : const Text('Loading complete'),
               const SizedBox(height: 20), // gap between widgets
               if (!_isLoading)
                 Text('Port open: $portOpen \nPort close: $portClose \nGEO Platform Number: $geoPlatformNumber'),
